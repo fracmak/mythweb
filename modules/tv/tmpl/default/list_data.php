@@ -37,6 +37,9 @@
 </div>
 
 <table width="100%" border="0" cellpadding="4" cellspacing="2" class="list small">
+<col width="96px"/>
+<col span="36"/>
+<col width="24px"/>
 <?php
         $timeslot_anchor    = 0;
         $channel_count      = 0;
@@ -73,7 +76,7 @@
 						$timeslots_used = $timeslots_left;
 						require tmpl_dir.'list_cell_nodata.php';
 					}
-        			echo "<td>&nbsp;</td></tr>";
+        			echo '<td>&nbsp;</td></tr>';
 				}
         		$last_chan_id = $program->chanid;
 		        // Display the timeslot bar?
@@ -88,7 +91,7 @@
         	            if ($block_count++ % timeslot_blocks)
             	            continue;
 ?>
-    <td class="menu nowrap" colspan="<?php echo timeslot_blocks ?>" style="width: <?php echo intVal(timeslot_blocks * 94 / num_time_slots) ?>%" align="center"><a class="link" onclick="list_update(<?php echo $time; ?>);"><?php echo strftime($_SESSION['time_format'], $time) ?></a></td>
+    <td class="menu nowrap" colspan="<?php echo timeslot_blocks ?>" align="center"><a class="link" onclick="list_update(<?php echo $time; ?>);"><?php echo strftime($_SESSION['time_format'], $time) ?></a></td>
 <?php
 	                }
 ?>
@@ -132,19 +135,12 @@
 					}
 				}
 	        } // end new channel
-	        //if ($timeslots_left < 1)
-            //    continue;
 
         // Calculate the number of time slots this program gets
         	$length = round($program_ends / $timeslot_size) - round($program_starts / $timeslot_size);
-//            $length = (($program_ends - $program_starts) / $timeslot_size);
             if ($length < .5) continue; // ignore shows that don't take up at least half a timeslot
             $timeslots_used = round($length);
             $timeslots_left -= $timeslots_used;
-//            if ($timeslots_left < 0)
-//            echo "$program->title: $length ($program_ends - $program_starts)";
-        // Make sure this doesn't put us over
-//            if ($timeslots_left > 0)
             require tmpl_dir.'list_cell_program.php';
         // Cleanup is good
             unset($program);

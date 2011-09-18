@@ -5,7 +5,7 @@
     // then, we just display the info
         $percent = intVal($timeslots_used * 96 / num_time_slots);
 ?>
-    <td class="small <?php echo $program->css_class; ?>" colspan="<?php echo $timeslots_used ?>" style="width: <?php echo $percent; ?>%" valign="top"><?php
+    <td class="small <?php echo $program->css_class; ?>" colspan="<?php echo $timeslots_used ?>" valign="top"><?php
     // hdtv?
         if ($program->hdtv && $percent > 5)
             echo '<span class="hdtv_icon">HD</span>';
@@ -56,9 +56,10 @@
         }
         $parens = '';
     // Finally, print some other information
+    if ($percent > 5){
         if ($program->previouslyshown)
             $parens = '<i>'.t('Repeat').'</i>';
         if ($parens)
             echo "<BR>($parens)";
-
+}
     ?></td>
