@@ -213,7 +213,7 @@
                          UNIX_TIMESTAMP(program.endtime) AS endtime_unix,
                          IFNULL(programrating.system, "") AS rater,
                          IFNULL(programrating.rating, "") AS rating,
-                         channel.callsign,
+                         channel.callsign, channel.name as channame, channel.icon as chanicon,
                          channel.channum, recstatus
                   FROM channel
                        LEFT JOIN program USE INDEX (id_start_end) ON program.chanid = channel.chanid AND program.starttime < FROM_UNIXTIME('.$db->escape($end_time).')
@@ -221,10 +221,8 @@
                        LEFT JOIN programrating on programrating.chanid = channel.chanid AND programrating.starttime = program.starttime
                        LEFT JOIN oldrecorded ON oldrecorded.recstatus IN (-3, 11) AND future = 0
                        			AND (oldrecorded.programid = program.programid AND oldrecorded.seriesid = program.seriesid) 
-                 WHERE channel.visible = 1';
-    // Group and sort
-            $query .= "\nGROUP BY channel.channum, channel.callsign, program.chanid, program.starttime" 
-            		. " ORDER BY (channel.channum + 0), channel.channum, channel.chanid, program.starttime";
+                 WHERE channel.visible = 1 GROUP BY channel.callsign, channel.chanid, program.starttime 
+                 ORDER BY (channel.channum + 0), channel.channum, channel.chanid, program.starttime';
     // Query
         $sh = $db->query($query);
     // No results
@@ -242,18 +240,18 @@
                              LIMIT 1');
     // Load in all of the programs (if any?)
         $these_programs = array();
-        $scheduledRecordings = Schedule::findScheduled();
+//        $scheduledRecordings = Schedule::findScheduled();
         while ($data = $sh->fetch_assoc()) {
             if (!$data['chanid'])
                 continue;
         // This program has already been loaded, and is attached to a recording schedule
-            if (!empty($data['title']) && $scheduledRecordings[$data['callsign']][$data['starttime_unix']][0]->title == $data['title']) {
-                $program =& $scheduledRecordings[$data['callsign']][$data['starttime_unix']][0];
+//            if (!empty($data['title']) && $scheduledRecordings[$data['callsign']][$data['starttime_unix']][0]->title == $data['title']) {
+//                $program =& $scheduledRecordings[$data['callsign']][$data['starttime_unix']][0];
             // merge in data fetched from DB
-                $program->merge(new Program($data));
-            }
+//                $program->merge(new Program($data));
+//            }
         // Otherwise, create a new instance of the program
-            else {
+//            else {
             // Load the recstatus now that we can use an index
 				if ($data['category_type'] == 'movie' || ($data['title'] && $data['subtitle'] && $data['description'])) {
                    $sh3->execute($data['title'], $data['subtitle'], $data['description']);
@@ -261,7 +259,7 @@
                 }
             // Create a new instance
                 $program =& Program::find($data);
-            }
+//            }
         // Add this program to the channel hash, etc.
             $these_programs[]                          =& $program;
         // Cleanup
@@ -272,3 +270,4 @@
         $sh->finish();
         return $these_programs;
     }
+    
