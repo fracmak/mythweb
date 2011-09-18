@@ -201,7 +201,9 @@ class Program extends MythBase {
             $this->chanid                   = $data['chanid'];
             $this->channum                  = $data['channum'];
             $this->channame                 = $data['channame'];
-            $this->chanicon                 = $data['chanicon'];
+            if ($data['chanicon']){
+                $this->chanicon = 'data/tv_icons/'.basename($data['chanicon']);
+            }
             $this->callsign                 = $data['callsign'];
             $this->description              = $data['description'];
             $this->endtime                  = $data['endtime_unix'];
