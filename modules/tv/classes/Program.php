@@ -21,6 +21,7 @@ class Program extends MythBase {
     public $description;
     public $category;
     public $chanid;
+    public $chanicon;
     public $channum;
     public $callsign;
     public $channame;
@@ -198,6 +199,10 @@ class Program extends MythBase {
             $this->category                 = _or($data['category'],        t('Unknown'));
             $this->category_type            = _or($data['category_type'],   t('Unknown'));
             $this->chanid                   = $data['chanid'];
+            $this->channum                  = $data['channum'];
+            $this->channame                 = $data['channame'];
+            $this->chanicon                 = $data['chanicon'];
+            $this->callsign                 = $data['callsign'];
             $this->description              = $data['description'];
             $this->endtime                  = $data['endtime_unix'];
             $this->previouslyshown          = $data['previouslyshown'];
@@ -265,8 +270,8 @@ class Program extends MythBase {
         if (in_array($this->airdate, array('0000-00-00', '0000', '1900-01-01')))
             $this->airdate = NULL;
     // Do we have a chanid?  Load some info about it
-        if ($this->chanid && !isset($this->channel))
-            $this->channel =& Channel::find($this->chanid);
+//        if ($this->chanid && !isset($this->channel))
+//            $this->channel =& Channel::find($this->chanid);
 
     // Calculate the duration
         if ($this->recendts)
