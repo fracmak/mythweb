@@ -207,6 +207,22 @@
             $start_time = 0;
         if ($end_time < 0)
             $end_time = 0;
+		// build a recorded map of episodes we need to mark as recorded
+        $recorded_map = array();
+		$sh2 = $db->prepare('select SQL_NO_CACHE program.programid, oldrecorded.recstatus from program 
+						INNER JOIN oldrecorded ON oldrecorded.title = program.title AND oldrecorded.recstatus IN (-3, 11) AND future = 0 AND
+									oldrecorded.subtitle = program.subtitle AND oldrecorded.description = program.description
+						where 
+						program.starttime < FROM_UNIXTIME('.$db->escape($end_time).') and program.starttime > FROM_UNIXTIME('.$db->escape($start_time - 60 * 60 * 12).') AND 
+						program.endtime > FROM_UNIXTIME('.$db->escape($start_time).') AND program.starttime != program.endtime 
+						AND (program.category_type = "movie" OR (length(program.title) > 0 AND length(program.subtitle) > 0 AND length(program.description) > 0))');
+		if ($sh2->num_rows() > 0){
+			while ($data = $sh2->fetch_assoc()){
+				$recorded_map[$data['programid']] = $data['recstatus'];
+			}
+		}
+		$sh2->finish();
+
     // Build the sql query, and execute it
 $query = 'SELECT program.*, 
 	UNIX_TIMESTAMP(program.starttime) AS starttime_unix, 
@@ -218,8 +234,8 @@ $query = 'SELECT program.*,
 FROM program 
 	INNER JOIN channel ON program.chanid = channel.chanid AND channel.visible = 1 
 	LEFT JOIN programrating on programrating.chanid = channel.chanid AND programrating.starttime = program.starttime 
-	LEFT JOIN oldrecorded ON oldrecorded.recstatus IN (-3, 11) AND 
-		(oldrecorded.programid = program.programid AND oldrecorded.seriesid = program.seriesid) 
+	LEFT JOIN oldrecorded ON oldrecorded.recstatus IN (-3, 11) AND future = 0 AND
+		oldrecorded.programid = program.programid AND oldrecorded.seriesid = program.seriesid 
 WHERE program.starttime < FROM_UNIXTIME('.$db->escape($end_time).') and program.starttime > FROM_UNIXTIME('.$db->escape($start_time - 60 * 60 * 12).') AND 
 	program.endtime > FROM_UNIXTIME('.$db->escape($start_time).') AND program.starttime != program.endtime 
 GROUP BY channel.callsign, program.chanid, program.starttime 
@@ -248,16 +264,10 @@ ORDER BY (channel.channum + 0), channel.channum, program.chanid, program.startti
             $sh->finish();
             return array();
         }
-        $sh3 = $db->prepare('SELECT recstatus
-                               FROM oldrecorded
-                              WHERE recstatus IN (-3, 11)
-                                    AND title       = ?
-                                    AND subtitle    = ?
-                                    AND description = ?
-                                    AND future = 0 
-                             LIMIT 1');
-    // Load in all of the programs (if any?)
+
+	// Load in all of the programs (if any?)
         $these_programs = array();
+        
 //        $scheduledRecordings = Schedule::findScheduled();
         while ($data = $sh->fetch_assoc()) {
             if (!$data['chanid'])
@@ -270,12 +280,10 @@ ORDER BY (channel.channum + 0), channel.channum, program.chanid, program.startti
 //            }
         // Otherwise, create a new instance of the program
 //            else {
-            // Load the recstatus now that we can use an index
-				if ($data['category_type'] == 'movie' || ($data['title'] && $data['subtitle'] && $data['description'])) {
-                   $sh3->execute($data['title'], $data['subtitle'], $data['description']);
-                   list($data['recstatus']) = $sh3->fetch_row();
-                }
             // Create a new instance
+            	if ($recorded_map[$program->programid])
+            		$data['recstatus'] = $recorded_map[$program->programid];
+            		
                 $program =& Program::find($data);
 //            }
         // Add this program to the channel hash, etc.
@@ -284,7 +292,6 @@ ORDER BY (channel.channum + 0), channel.channum, program.chanid, program.startti
             unset($program);
         }
     // Cleanup
-        $sh3->finish();
         $sh->finish();
         return $these_programs;
     }
