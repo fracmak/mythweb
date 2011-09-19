@@ -209,57 +209,41 @@
             $start_time = 0;
         if ($end_time < 0)
             $end_time = 0;
-		// build a recorded map of episodes we need to mark as recorded
+        // build a recorded map of episodes we need to mark as recorded
         $recorded_map = array();
-		$sh2 = $db->prepare('select program.programid, oldrecorded.recstatus from program 
-						INNER JOIN oldrecorded ON oldrecorded.title = program.title AND oldrecorded.recstatus IN (-3, 11) AND future = 0 AND
-									oldrecorded.subtitle = program.subtitle AND oldrecorded.description = program.description
-						where 
-						program.starttime < FROM_UNIXTIME('.$db->escape($end_time).') and program.starttime > FROM_UNIXTIME('.$db->escape($start_time - 60 * 60 * 12).') AND 
-						program.endtime > FROM_UNIXTIME('.$db->escape($start_time).') AND program.starttime != program.endtime 
-						AND (program.category_type = "movie" OR (length(program.title) > 0 AND length(program.subtitle) > 0 AND length(program.description) > 0))');
-		if ($sh2->num_rows() > 0){
-			while ($data = $sh2->fetch_assoc()){
-				$recorded_map[$data['programid']] = $data['recstatus'];
-			}
-		}
-		$sh2->finish();
+        $sh2 = $db->prepare('select program.programid, oldrecorded.recstatus from program 
+                        INNER JOIN oldrecorded ON oldrecorded.title = program.title AND oldrecorded.recstatus IN (-3, 11) AND future = 0 AND
+                                    oldrecorded.subtitle = program.subtitle AND oldrecorded.description = program.description
+                        where 
+                        program.starttime < FROM_UNIXTIME('.$db->escape($end_time).') and program.starttime > FROM_UNIXTIME('.$db->escape($start_time - 60 * 60 * 12).') AND 
+                        program.endtime > FROM_UNIXTIME('.$db->escape($start_time).') AND program.starttime != program.endtime 
+                        AND (program.category_type = "movie" OR (length(program.title) > 0 AND length(program.subtitle) > 0 AND length(program.description) > 0))');
+        if ($sh2->num_rows() > 0){
+            while ($data = $sh2->fetch_assoc()){
+                $recorded_map[$data['programid']] = $data['recstatus'];
+            }
+        }
+        $sh2->finish();
 
     // Build the sql query, and execute it
-$query = 'SELECT program.*, 
-	UNIX_TIMESTAMP(program.starttime) AS starttime_unix, 
-	UNIX_TIMESTAMP(program.endtime) AS endtime_unix, 
-	IFNULL(programrating.system, "") AS rater, 
-	IFNULL(programrating.rating, "") AS rating, 
-	channel.callsign, channel.name as channame, channel.icon as chanicon, 
-	channel.channum, recstatus 
-FROM program 
-	INNER JOIN channel ON program.chanid = channel.chanid AND channel.visible = 1 
-	LEFT JOIN programrating on programrating.chanid = channel.chanid AND programrating.starttime = program.starttime 
-	LEFT JOIN oldrecorded ON oldrecorded.recstatus IN (-3, 11) AND future = 0 AND
-		oldrecorded.programid = program.programid AND oldrecorded.seriesid = program.seriesid 
-WHERE program.starttime < FROM_UNIXTIME('.$db->escape($end_time).') and program.starttime > FROM_UNIXTIME('.$db->escape($start_time - 60 * 60 * 12).') AND 
-	program.endtime > FROM_UNIXTIME('.$db->escape($start_time).') AND program.starttime != program.endtime 
-GROUP BY channel.callsign, program.chanid, program.starttime 
-ORDER BY (channel.channum + 0), channel.channum, program.chanid, program.starttime';
-
-/*        $query = 'SELECT program.*,
-                         UNIX_TIMESTAMP(program.starttime) AS starttime_unix,
-                         UNIX_TIMESTAMP(program.endtime) AS endtime_unix,
-                         IFNULL(programrating.system, "") AS rater,
-                         IFNULL(programrating.rating, "") AS rating,
-                         channel.callsign, channel.name as channame, channel.icon as chanicon,
-                         channel.channum, recstatus
-                  FROM channel
-                       LEFT JOIN program USE INDEX (id_start_end) ON program.chanid = channel.chanid AND program.starttime < FROM_UNIXTIME('.$db->escape($end_time).')
-                       			AND program.endtime > FROM_UNIXTIME('.$db->escape($start_time).') AND program.starttime != program.endtime
-                       LEFT JOIN programrating on programrating.chanid = channel.chanid AND programrating.starttime = program.starttime
-                       LEFT JOIN oldrecorded ON oldrecorded.recstatus IN (-3, 11) AND future = 0
-                       			AND (oldrecorded.programid = program.programid AND oldrecorded.seriesid = program.seriesid) 
-                 WHERE channel.visible = 1 GROUP BY channel.callsign, channel.chanid, program.starttime 
-                 ORDER BY (channel.channum + 0), channel.channum, channel.chanid, program.starttime';
-*/
-	// Query
+        $query = 'SELECT program.*, 
+            UNIX_TIMESTAMP(program.starttime) AS starttime_unix, 
+            UNIX_TIMESTAMP(program.endtime) AS endtime_unix, 
+            IFNULL(programrating.system, "") AS rater, 
+            IFNULL(programrating.rating, "") AS rating, 
+            channel.callsign, channel.name as channame, channel.icon as chanicon, 
+            channel.channum, recstatus 
+        FROM program 
+            INNER JOIN channel ON program.chanid = channel.chanid AND channel.visible = 1 
+            LEFT JOIN programrating on programrating.chanid = channel.chanid AND programrating.starttime = program.starttime 
+            LEFT JOIN oldrecorded ON oldrecorded.recstatus IN (-3, 11) AND future = 0 AND
+                oldrecorded.programid = program.programid AND oldrecorded.seriesid = program.seriesid 
+        WHERE program.starttime < FROM_UNIXTIME('.$db->escape($end_time).') and program.starttime > FROM_UNIXTIME('.$db->escape($start_time - 60 * 60 * 12).') AND 
+            program.endtime > FROM_UNIXTIME('.$db->escape($start_time).') AND program.starttime != program.endtime 
+        GROUP BY channel.callsign, program.chanid, program.starttime 
+        ORDER BY (channel.channum + 0), channel.channum, program.chanid, program.starttime';
+        
+    // Query
         $sh = $db->query($query);
     // No results
         if ($sh->num_rows() < 1) {
@@ -267,7 +251,7 @@ ORDER BY (channel.channum + 0), channel.channum, program.chanid, program.startti
             return array();
         }
 
-	// Load in all of the programs (if any?)
+    // Load in all of the programs (if any?)
         $these_programs = array();
         
 //        $scheduledRecordings = Schedule::findScheduled();
@@ -283,9 +267,9 @@ ORDER BY (channel.channum + 0), channel.channum, program.chanid, program.startti
         // Otherwise, create a new instance of the program
             else {
             // Create a new instance
-            	if ($recorded_map[$program->programid])
-            		$data['recstatus'] = $recorded_map[$program->programid];
-            		
+                if ($recorded_map[$program->programid])
+                    $data['recstatus'] = $recorded_map[$program->programid];
+                    
                 $program =& Program::find($data);
             }
         // Add this program to the channel hash, etc.
