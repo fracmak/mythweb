@@ -208,7 +208,24 @@
         if ($end_time < 0)
             $end_time = 0;
     // Build the sql query, and execute it
-        $query = 'SELECT program.*,
+$query = 'SELECT program.*, 
+	UNIX_TIMESTAMP(program.starttime) AS starttime_unix, 
+	UNIX_TIMESTAMP(program.endtime) AS endtime_unix, 
+	IFNULL(programrating.system, "") AS rater, 
+	IFNULL(programrating.rating, "") AS rating, 
+	channel.callsign, channel.name as channame, channel.icon as chanicon, 
+	channel.channum, recstatus 
+FROM program 
+	INNER JOIN channel ON program.chanid = channel.chanid AND channel.visible = 1 
+	LEFT JOIN programrating on programrating.chanid = channel.chanid AND programrating.starttime = program.starttime 
+	LEFT JOIN oldrecorded ON oldrecorded.recstatus IN (-3, 11) AND 
+		(oldrecorded.programid = program.programid AND oldrecorded.seriesid = program.seriesid) 
+WHERE program.starttime < FROM_UNIXTIME('.$db->escape($end_time).') and program.starttime > FROM_UNIXTIME('.$db->escape($start_time - 60 * 60 * 8).') AND 
+	program.endtime > FROM_UNIXTIME('.$db->escape($start_time).') AND program.starttime != program.endtime 
+GROUP BY channel.callsign, program.chanid, program.starttime 
+ORDER BY (channel.channum + 0), channel.channum, program.chanid, program.starttime';
+
+/*        $query = 'SELECT program.*,
                          UNIX_TIMESTAMP(program.starttime) AS starttime_unix,
                          UNIX_TIMESTAMP(program.endtime) AS endtime_unix,
                          IFNULL(programrating.system, "") AS rater,
@@ -223,7 +240,8 @@
                        			AND (oldrecorded.programid = program.programid AND oldrecorded.seriesid = program.seriesid) 
                  WHERE channel.visible = 1 GROUP BY channel.callsign, channel.chanid, program.starttime 
                  ORDER BY (channel.channum + 0), channel.channum, channel.chanid, program.starttime';
-    // Query
+*/
+	// Query
         $sh = $db->query($query);
     // No results
         if ($sh->num_rows() < 1) {
