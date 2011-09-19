@@ -114,6 +114,7 @@
 
 // If there is a program for this, import its values into the schedule
     if ($program) {
+        $program->channel =& Channel::find($program->chanid);
     // Back up the search title
         if ($schedule->search) {
             $schedule->search_title = $schedule->title;
