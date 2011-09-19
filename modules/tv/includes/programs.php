@@ -209,7 +209,7 @@
             $end_time = 0;
 		// build a recorded map of episodes we need to mark as recorded
         $recorded_map = array();
-		$sh2 = $db->prepare('select SQL_NO_CACHE program.programid, oldrecorded.recstatus from program 
+		$sh2 = $db->prepare('select program.programid, oldrecorded.recstatus from program 
 						INNER JOIN oldrecorded ON oldrecorded.title = program.title AND oldrecorded.recstatus IN (-3, 11) AND future = 0 AND
 									oldrecorded.subtitle = program.subtitle AND oldrecorded.description = program.description
 						where 
