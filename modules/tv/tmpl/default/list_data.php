@@ -37,8 +37,17 @@
 </div>
 
 <table width="100%" border="0" cellpadding="4" cellspacing="2" class="list small">
+<?php
+	if (defined('theme_num_time_slots')) {
+		$num_time_slots = theme_num_time_slots;
+		$timeslot_size = theme_timeslot_size;
+	} else {
+		$number_of_time_slots = num_time_slots;
+		$timeslot_size = timeslot_size;
+	}
+?>
 <col width="96px"/>
-<col span="36"/>
+<col span="<?=$number_of_time_slots?>"/>
 <col width="24px"/>
 <?php
         $timeslot_anchor    = 0;
@@ -118,13 +127,7 @@
             </a>
             </td>
     <?php
-                if (defined('theme_num_time_slots')) {
-                    $timeslots_left = theme_num_time_slots;
-                    $timeslot_size = theme_timeslot_size;
-                } else {
-                    $timeslots_left = num_time_slots;
-                    $timeslot_size = timeslot_size;
-                }
+                $timeslots_left = $number_of_time_slots;
                 if ($program_starts > $list_starttime) {
                     $length = (($program_starts - $list_starttime) / $timeslot_size);
                     if ($length >= 0.5) {
