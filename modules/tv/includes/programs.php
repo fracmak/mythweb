@@ -66,6 +66,8 @@
             $program =& load_all_program_data($start_time, $start_time, $chanid, true, 'program.manualid='.intval($manualid));
         else
             $program =& load_all_program_data($start_time, $start_time, $chanid, true);
+
+        $program->channel =& Channel::find($program->chanid);
         if (!is_object($program) || strcasecmp(get_class($program), 'program'))
             return NULL;
         return $program;
