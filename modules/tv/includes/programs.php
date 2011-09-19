@@ -220,7 +220,7 @@ FROM program
 	LEFT JOIN programrating on programrating.chanid = channel.chanid AND programrating.starttime = program.starttime 
 	LEFT JOIN oldrecorded ON oldrecorded.recstatus IN (-3, 11) AND 
 		(oldrecorded.programid = program.programid AND oldrecorded.seriesid = program.seriesid) 
-WHERE program.starttime < FROM_UNIXTIME('.$db->escape($end_time).') and program.starttime > FROM_UNIXTIME('.$db->escape($start_time - 60 * 60 * 8).') AND 
+WHERE program.starttime < FROM_UNIXTIME('.$db->escape($end_time).') and program.starttime > FROM_UNIXTIME('.$db->escape($start_time - 60 * 60 * 12).') AND 
 	program.endtime > FROM_UNIXTIME('.$db->escape($start_time).') AND program.starttime != program.endtime 
 GROUP BY channel.callsign, program.chanid, program.starttime 
 ORDER BY (channel.channum + 0), channel.channum, program.chanid, program.starttime';
