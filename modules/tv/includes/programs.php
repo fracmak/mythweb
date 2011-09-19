@@ -273,19 +273,19 @@ ORDER BY (channel.channum + 0), channel.channum, program.chanid, program.startti
             if (!$data['chanid'])
                 continue;
         // This program has already been loaded, and is attached to a recording schedule
-//            if (!empty($data['title']) && $scheduledRecordings[$data['callsign']][$data['starttime_unix']][0]->title == $data['title']) {
-//                $program =& $scheduledRecordings[$data['callsign']][$data['starttime_unix']][0];
+            if (!empty($data['title']) && $scheduledRecordings[$data['callsign']][$data['starttime_unix']][0]->title == $data['title']) {
+                $program =& $scheduledRecordings[$data['callsign']][$data['starttime_unix']][0];
             // merge in data fetched from DB
-//                $program->merge(new Program($data));
-//            }
+                $program->merge(new Program($data));
+            }
         // Otherwise, create a new instance of the program
-//            else {
+            else {
             // Create a new instance
             	if ($recorded_map[$program->programid])
             		$data['recstatus'] = $recorded_map[$program->programid];
             		
                 $program =& Program::find($data);
-//            }
+            }
         // Add this program to the channel hash, etc.
             $these_programs[]                          =& $program;
         // Cleanup
