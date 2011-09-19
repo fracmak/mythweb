@@ -126,7 +126,6 @@
 					$timeslot_size = timeslot_size;
 				}
 				if ($program_starts > $list_starttime) {
-					echo "<td>nodata new channel</td>";
 					$length = (($program_starts - $list_starttime) / $timeslot_size);
 					if ($length >= 0.5) {
 						$timeslots_used = ceil($length);
