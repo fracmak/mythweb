@@ -131,7 +131,7 @@
                 if ($program_starts > $list_starttime) {
                     $length = (($program_starts - $list_starttime) / $timeslot_size);
                     if ($length >= 0.5) {
-                        $timeslots_used = ceil($length);
+                        $timeslots_used = round($length);
                         require tmpl_dir.'list_cell_nodata.php';
                         $timeslots_left -= $timeslots_used;
                     }
