@@ -61,6 +61,10 @@
         $program_list = load_program_list($list_starttime, $list_endtime);
 
         foreach ($program_list as $program) {
+			if ($last_chan_id == $program->chanid && $program->starttime < $program_ends){
+				//this is a guard against invalid programs that start before the last program ends
+				continue;
+			}
         // Get a modified start/end time for this program (in case it starts/ends outside of the aloted time
             $program_starts = $program->starttime;
             $program_ends   = $program->endtime;
